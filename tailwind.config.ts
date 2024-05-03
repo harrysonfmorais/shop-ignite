@@ -8,10 +8,17 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      maxWidth: {
+        app: 'calc(100vw - ((100vw - 1180px) / 2))',
+      },
       backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+        product: 'linear-gradient(180deg, #1ea483 0%, #7465d4 100%)',
+      },
+      backgroundColor: {
+        footer: 'rgba(0, 0, 0, 0.6)',
+      },
+      gridTemplateRows: {
+        app: 'min-content max-content',
       },
     },
   },
