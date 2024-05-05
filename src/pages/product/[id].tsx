@@ -4,45 +4,27 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import Stripe from "stripe";
 import ProductLoading from "./component/loading";
-import axios from "axios";
-import { useState } from "react";
 import Head from "next/head";
+import { IProduct, useCart } from "@/context/cart-context";
 
 interface ProductProps {
-  product: {
-    id: string
-    name: string
-    imageUrl: string
-    price: string
-    description: string
-    defaultPriceId: string
-  }
+  product: IProduct
 }
 
 export default function Product({ product }: ProductProps) {
   const { isFallback } = useRouter()
-  const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] = useState(false)
-
+  const { addToCart, checkIfItemAlreadyExists } = useCart()
+  
   if (isFallback) {
     return <ProductLoading />
   }
-
-  async function handleBuyProduct() {
-    setIsCreatingCheckoutSession(true)
-    try {
-      const response = await axios.post('/api/checkout', {
-        priceId: product.defaultPriceId
-      })
-
-      const { checkoutUrl } = response.data
-
-      window.location.href = checkoutUrl
-    } catch (err) {
-      setIsCreatingCheckoutSession(false)
-      alert('Falha ao direcionar ao checkout!')
-    }
+  
+  const productAlreadyInCart = checkIfItemAlreadyExists(product.id)
+  
+  function handleAddProduct() {
+    addToCart(product)
   }
-
+ 
   return (
     <>
       <Head>
@@ -67,18 +49,16 @@ export default function Product({ product }: ProductProps) {
             {product.description}
           </p>
 
-          <div className="mt-8 flex items-center gap-3">
-            <span className="inline-block rounded-full bg-violet-500 px-5 py-2.5 font-semibold">
-              {product.price}
-            </span>
-          </div>
+          <span className="text-xl font-bold mt-4">
+            {product.price}
+          </span>
 
           <button
-            onClick={handleBuyProduct}
-            disabled={isCreatingCheckoutSession}
+            onClick={handleAddProduct}
+            disabled={productAlreadyInCart}
             className="mt-8 flex h-12 w-full items-center justify-center rounded-full bg-emerald-600 font-semibold text-gray-50 hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Adicionar ao carrinho
+            {productAlreadyInCart ? 'Produto adicionado!' : 'Adicionar ao carrinho'}
           </button>
         </div>
       </section>
@@ -115,6 +95,7 @@ export const  getStaticProps: GetStaticProps<any, { id: string }> = async ({ par
           style: 'currency',
           currency: 'BRL'
         }).format(price.unit_amount ? price.unit_amount / 100 : 129),
+        numberPrice: price.unit_amount / 100,
         description: product.description,
         defaultPriceId: price.id
       }

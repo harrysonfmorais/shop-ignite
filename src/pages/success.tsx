@@ -3,16 +3,14 @@ import { GetServerSideProps } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import Link from 'next/link'
+import Stripe from 'stripe'
 
 interface SuccessProps {
   customerName: string
-  product: {
-    name: string
-    imageUrl: string
-  }
+  productsImages: string[]
 }
 
-export default function Success({customerName, product}: SuccessProps) {
+export default function Success({customerName, productsImages}: SuccessProps) {
   return (
     <>
       <Head>
@@ -20,11 +18,25 @@ export default function Success({customerName, product}: SuccessProps) {
         <meta name="robots" content="noindex" />
       </Head>
       
-      <div className="mt-40 flex flex-col items-center justify-center gap-6">
+      <main className="mt-20 flex flex-col items-center justify-center gap-5">
+        <section className='flex items-center mb-12'>
+          <div className='relative flex items-center justify-center size-36'>
+            {productsImages.map((image, i) => (
+              <Image 
+                className='bg-product rounded-full bg-cover'
+                key={i}
+                src={image} 
+                alt='' 
+                width={120} 
+                height={110}
+              />
+            ))}
+          </div>
+        </section>
         <h1 className="text-3xl font-bold">Compra efetuada!</h1>
-        <Image src={product.imageUrl} alt='' width={120} height={110}/>
-        <p className="text-2xl font-medium">
-          Uhuul, <strong>{customerName}</strong> sua <strong>{product.name}</strong> já está a caminho da sua casa.{' '}
+        <p className="text-2xl font-medium max-w-[560px] text-center mt-8">
+          Uhuul, <strong>{customerName}</strong> sua compra de{" "}
+          {productsImages.length} {productsImages.length > 1 ? 'camisetas' : 'camiseta'} já está a caminho do seu endereço.
         </p>
 
         <Link
@@ -33,7 +45,7 @@ export default function Success({customerName, product}: SuccessProps) {
         >
           Voltar ao catálogo
         </Link>
-      </div>
+      </main>
     </>
   )
 }
@@ -56,16 +68,16 @@ export const getServerSideProps: GetServerSideProps = async ({ query, params }) 
 
   
   const customerName = session.customer_details?.name
-  const product = session.line_items?.data[0].price?.product
+  const productsImages = session.line_items?.data.map((item) => {
+    const product = item.price?.product as Stripe.Product
 
-  console.log(product)
+    return product.images[0]
+  })
+
   return {
     props: {
       customerName,
-      product: {
-        name: product.name,
-        imageUrl: product.images[0]
-      }
+      productsImages,
     }
   }
 }

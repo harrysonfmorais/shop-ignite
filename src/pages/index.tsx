@@ -1,20 +1,29 @@
+import { IProduct, useCart } from "@/context/cart-context"
 import { stripe } from "@/lib/stripe"
+import { ShoppingBag } from "lucide-react"
 import { GetStaticProps } from "next"
 import Head from "next/head"
 import Image from "next/image"
 import Link from "next/link"
+import { MouseEvent } from "react"
 import Stripe from "stripe"
 
 interface HomeProps {
-  products: {
-    id: string
-    name: string
-    imageUrl: string
-    price: string
-  }[]
+  products: IProduct[]
 }
 
 export default function Home({products}: HomeProps) {
+  const { addToCart, checkIfItemAlreadyExists } = useCart();
+
+  function handleAddToCart(
+    e: MouseEvent<HTMLButtonElement>,
+    product: IProduct
+  ) {
+    e.preventDefault();
+    addToCart(product);
+  }
+
+
   return (
     <>
       <Head>
@@ -37,12 +46,21 @@ export default function Home({products}: HomeProps) {
                 quality={100}
               />
 
-              <div className="absolute bottom-10 right-10 flex h-12 max-w-[280px] items-center gap-2 rounded-full border-2 border-zinc-500 bg-black/60 p-1 pl-5">
-                <span className="truncate text-sm">{product.name}</span>
-                <span className="flex h-full items-center justify-center rounded-full bg-violet-500 px-4 font-semibold">
-                  {product.price}
-                </span>
-              </div>
+              <footer className="absolute bottom-1 left-1 right-1 p-8 rounded-md flex items-center justify-between translate-y-10 opacity-0 transition-all bg-footer group-hover:opacity-100 group-hover:translate-y-1">
+                <div className="flex flex-col gap-8">
+                  <span className="truncate text-lg">{product.name}</span>
+                  <span className="text-lg font-bold">
+                    {product.price}
+                  </span>
+                </div>
+                <button 
+                  className="bg-transparent disabled:cursor-not-allowed"
+                  onClick={(e) => handleAddToCart(e, product)}
+                  disabled={checkIfItemAlreadyExists(product.id)}
+                >
+                  <ShoppingBag className="text-green-700 size-6 hover:text-green-500"/>
+                </button>
+              </footer>
             </Link>
           )
         })}
@@ -66,7 +84,9 @@ export const getStaticProps: GetStaticProps = async () => {
       price: new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL'
-      }).format(price.unit_amount ? price.unit_amount / 100 : 129),
+      }).format(price.unit_amount / 100),
+      numberPrice: price.unit_amount / 100,
+      defaultPriceId: price.id,
     }
   })
 

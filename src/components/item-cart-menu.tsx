@@ -1,32 +1,39 @@
+import { IProduct, useCart } from '@/context/cart-context'
 import Image from 'next/image'
 
-export function ItemCartMenu() {
+interface ItemCartMenuProps {
+  cartItem: IProduct
+}
+
+export function ItemCartMenu({ cartItem }: ItemCartMenuProps) {
+  const { removeCartItem } = useCart()
+
+  function handleRemoveProduct() {
+    removeCartItem(cartItem.id)
+  }
+
   return (
-    <div className="flex w-full items-center justify-start gap-5">
+    <div className="flex h-24 w-full items-center justify-start gap-4">
       <Image
-        src="/camiseta-dowhile-2022.png"
+        src={cartItem.imageUrl}
         alt=""
-        className="size-24 rounded-md bg-product"
+        className="size-24 flex items-center justify-center rounded-md bg-product"
         width={100}
         height={100}
         quality={80}
       />
 
-      <div className="flex w-full flex-col items-start justify-center gap-1">
-        <div className="flex w-full items-center justify-between gap-2">
-          <h2 className="w-[160px] truncate text-lg">Camiseta Dowhile</h2>
+      <div className="flex w-full flex-col items-start justify-center gap-2">
+          <h2 className="w-[160px] truncate text-lg">{cartItem.name}</h2>
           <span className="mt-auto flex-1 font-medium">
-            {Number(129).toLocaleString('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
-            })}
+            {cartItem.price}
           </span>
-        </div>
-        <div className="flex w-full items-start justify-between px-2">
-          <button className="mt-auto bg-transparent text-lg font-bold text-emerald-700 hover:text-emerald-800">
+          <button
+            onClick={handleRemoveProduct}
+           className="mt-auto bg-transparent text-lg font-bold text-emerald-700 hover:text-emerald-800"
+          >
             Remover
           </button>
-        </div>
       </div>
     </div>
   )
