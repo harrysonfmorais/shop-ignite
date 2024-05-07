@@ -1,7 +1,5 @@
 # Desafio 04 - Ignite Shop
 
-<img src="./src/assets/home-page.png" width="600" alt="" />
-
 Nesse desafio, será implementado um carrinho de compras que utilizará os dados da API do Stripe para buscar os itens existentes, e controlará, através da sua aplicação, o número de itens que a pessoa deseja comprar.
 
 - Utilizar a listagem já criada pela aplicação, mas adicionará a possibilidade de adicionar aquele item ao carrinho na página do produto.
